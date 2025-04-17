@@ -1,0 +1,22 @@
+build_conv:
+  input_files: # List of input files to read from. Each instance contains `question` and `answer` key.
+    - src_data/data/source_data.jsonl
+  output_dir: src_data/data
+  output_file: conv_qwq_temp.jsonl # Output file for the generated data. Will be used later for cleaning
+  n_sample: 5      # Number of samples to read for data construction. -1 means all
+  max_tries: 20     # Number of tries to get a valid generated code
+  iter_num_max: 25  # Number of inference iterations per samples, to avoid infinite loop
+  llm_api: http://localhost:9894/generate # API to LLM
+  retriever_api: http://localhost:9892/search # search APi
+  gen_api: http://localhost:9893/generate # generation API for RAG engine
+  llm_tokenizer_path: Qwen/QwQ-32B-Preview # Tokenizer path for LLM used to generate data
+  ans_tokenizer_path: ZhipuAI/glm-4-9b-chat # Tokenizer path for answer generation LLM in rag engine
+  top_k: 3 # Top k for retriever in rag engine
+  num_workers: 4 # Number of workers for parallel processing
+
+clean_conv:
+  input_dir: src_data/data 
+  input_file: conv_qwq_temp.jsonl # file to be cleaned. Result from build_conv
+  output_dir: src_data/data 
+  output_file: conv_qwq.json # the final constructed data after cleaning
+  output_file_validity: conv_qwq_temp_valid.json  # the final constructed data after cleaning, with information about validity of each conv 

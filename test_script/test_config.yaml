@@ -1,0 +1,10 @@
+retriever:
+  api: http://localhost:9892 # search API
+
+vllm_async:
+  api: http://127.0.0.1:9894/generate # API to async vllm server
+  tokenizer_path: Qwen/QwQ-32B-Preview
+
+vllm: 
+  api: http://localhost:9893/generate # API to vllm server
+  tokenizer_path: ZhipuAI/glm-4-9b-chat
