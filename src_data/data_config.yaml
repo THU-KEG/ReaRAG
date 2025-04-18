@@ -13,6 +13,7 @@ build_conv:
   ans_tokenizer_path: ZhipuAI/glm-4-9b-chat # Tokenizer path for answer generation LLM in rag engine
   top_k: 3 # Top k for retriever in rag engine
   num_workers: 4 # Number of workers for parallel processing
+  save_batch_size: 10 # Number of samples to save in each batch
 
 clean_conv:
   input_dir: src_data/data 

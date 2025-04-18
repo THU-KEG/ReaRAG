@@ -182,7 +182,7 @@ def main():
     save_json(data_validity, file_path_validity)
 
     # Filter out invalid conversations
-    data = [item['conversation'] for item in data_validity if item['valid']]
+    data = [{"messages": item['conversation']} for item in data_validity if item['valid']]
     print(f"Number of valid conversations: {len(data)}")
     print(f"Number of invalid conversations: {len(data_validity) - len(data)}")
     save_json(data, clean_path)

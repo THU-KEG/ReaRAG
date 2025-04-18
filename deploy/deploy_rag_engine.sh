@@ -20,12 +20,13 @@ CUDA_VISIBLE_DEVICES=$GPU_FOR_RETRIEVER nohup python retriever_serving.py \
 sleep 5
 # ################################### 2. DEPLOY ANSWER LLM (FOR RAG Engine) ###################################
 echo "Starting ANSWER LLM..."
-CUDA_VISIBLE_DEVICES=$GPU_FOR_ANSWER_LLM nohup python vllm_serving.py \
-    --model_path $ANSWER_MODEL_DIR \
+CUDA_VISIBLE_DEVICES=$GPU_FOR_ANSWER_LLM nohup python vllm_async_serving.py \
+    --model $ANSWER_MODEL_DIR \
     --tensor_parallel_size 1 \
     --gpu_memory_utilization 0.6 \
     --host $ANSWER_LLM_HOST \
     --port $ANSWER_LLM_PORT \
+    --trust-remote-code \
   > logs/answer_llm.log 2>&1 &
 sleep 5
 

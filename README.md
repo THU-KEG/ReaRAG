@@ -34,7 +34,8 @@ pip install datasets flask langid uvicorn termcolor jieba fuzzywuzzy rouge
 
 conda install -c pytorch -c nvidia faiss-gpu=1.8.0
 ```
-### RAG engine preliminaries
+### RAG engine environment
+#### Preliminaries
 Please note that the RAG engine provided here differs from the implementation described in the original paper. To facilitate public usage, we offer a practical and simplified version in this repository.  
 
 To setup RAG engine, first download the following:
@@ -43,8 +44,7 @@ To setup RAG engine, first download the following:
 * Indexed 2018 Wikipedia Corpus. [FlashRAG_Dataset/retrieval_corpus/wiki18_100w_e5_index.zip](https://www.modelscope.cn/datasets/hhjinjiajie/FlashRAG_Dataset/file/view/master?id=47985&status=2&fileName=retrieval_corpus%252Fwiki18_100w_e5_index.zip)
 
 <a name="rag_engine_deployment"></a>
-####  RAG engine deployment
-Deployment steps:
+####  Deployment steps:
 1. Modify the config in `ReaRAG/deploy/deploy_config.sh` and `ReaRAG/deploy/retriever_config.yaml`
 2. Run the deployment script, make sure you see the phrase `'xx running on http://{host}:{port}'` to confirm deployment:
 ```
@@ -83,14 +83,15 @@ The result of the data will be saved at `ReaRAG/src_data/data`, named `conv_qwq.
 ```json
 {
     "messages": [{"role": "user", "content": "..."}, 
-                 {"role": "assistant", "content": "..."},
+                 {"role": "assistant", "reasoning": "..."},
                  {"role": "observation", "content": "..."}, ...]
 }
 ```
+During sft, the loss is computed only on messages that contain the `reasoning` key, rather than the `content` key.
 
 <a name="training"></a>
 ## 🏋🏻‍♂️ Training
-Training data can be found from ([🤗 huggingface]()).  
+Training data can be found from ([🤗 huggingface](https://huggingface.co/datasets/THU-KEG/ReaRAG-20k)).  
 You can mix it with general SFT data such as [ShareGPT](https://huggingface.co/datasets/anon8231489123/ShareGPT_Vicuna_unfiltered/tree/main/HTML_cleaned_raw_dataset). We adopt [Metragon-LM](https://github.com/NVIDIA/Megatron-LM) for model training. For a more lightweight implementation, you may adopt the code and environment from [LongAlign](https://github.com/THUDM/LongAlign).
 
 

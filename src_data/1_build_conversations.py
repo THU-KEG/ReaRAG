@@ -226,7 +226,7 @@ def main(data):
         # Use as_completed to get partial results immediately when a future is done
         pbar = tqdm(as_completed(futures), total=len(futures), desc="Building reflection conversations")
         batch_buffer = []
-        batch_size = 1  # adjust as needed
+        batch_size = config['save_batch_size']  # adjust as needed
 
         for future in pbar:
             result = future.result()

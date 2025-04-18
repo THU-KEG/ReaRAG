@@ -113,7 +113,6 @@ async def _generate(request_dict: dict, raw_request: Request) -> Response:
     # Extract the generated text
     return_outputs = []
     for output in final_output.outputs:
-        print(output)
         return_outputs.append({
             "prompt": final_output.prompt,
             "stop_reason": output.stop_reason,
