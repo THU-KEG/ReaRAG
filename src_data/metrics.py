@@ -101,13 +101,14 @@ def classification_score(prediction, ground_truth, **kwargs):
         score = 0.0
     return score
 
-def rouge_score(prediction, ground_truth, **kwargs):
+def rouge_score(prediction, ground_truth, rouge_type, **kwargs):
+    """rouge_type: 'rouge-1', 'rouge-2', 'rouge-l'"""
     rouge = Rouge()
     try:
         scores = rouge.get_scores([prediction], [ground_truth], avg=True)
     except:
         return 0.0
-    return scores["rouge-l"]["f"]
+    return scores[rouge_type]["f"]
 
 def rouge_zh_score(prediction, ground_truth, **kwargs):
     prediction = " ".join(list(jieba.cut(prediction, cut_all=False)))

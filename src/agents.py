@@ -2,7 +2,7 @@ import requests
 from typing import List, Dict, Any, Union
 import copy
 from termcolor import colored
-from src.prompts import rearag_system_prompt, short_ans_prompt, long_ans_prompt, extract_short_ans_prompt
+from src.prompts import rearag_system_prompt, short_ans_prompt, long_ans_prompt
 from src.utils import print_code
 
 class ReaRAGAgent():
@@ -26,7 +26,6 @@ class ReaRAGAgent():
         self.conversation_chain = [
             {"role": "system", "content": rearag_system_prompt},
             {"role": "user", "content": question},
-            {"role": "assistant", "content": ''},
         ]
         self.reasoning_chain = [] # dict type: thought, action, observation
         self.summary_chain = [] # str type:(question, answer)
@@ -150,11 +149,18 @@ class ReaRAGAgent():
         Handle a 'search' action within the RAG loop.
         Update conversation, summary_chain, reasoning_chain in-place.
         """
+        generation_config = {
+            'max_tokens': 1024,
+            'temperature': 0.95,
+            'top_p': 0.9,
+            'stop': ["<|user|>", "<|endoftext|>", "<|assistant|>"]
+        } # generation config for long answer
+
         query = self.agent_utils.preprocess_query(action['parameters']['query'])
 
         # Call rag_engine
         mem = self.rag_engine.Search(query)
-        observation = self.rag_engine.Answer(query, long_ans_prompt, mem) # LongAnswer
+        observation = self.rag_engine.Answer(query, long_ans_prompt, generation_config, mem) # LongAnswer
 
         # Store summary and reasoning chain
         self.summary_chain.append(f"{query}\n{observation}")
@@ -165,9 +171,8 @@ class ReaRAGAgent():
         })
 
         # Update conversation
-        self.conversation_chain[-1] = {"role": "assistant", "content": agent_response}
+        self.conversation_chain.append({"role": "assistant", "content": agent_response})
         self.conversation_chain.append({"role": "observation", "content": observation})
-        self.conversation_chain.append({"role": "assistant", "content": ''})
 
     def handle_finish_step(
         self, reference_ans: str
@@ -176,23 +181,23 @@ class ReaRAGAgent():
         Handle a 'finish' action in the RAG loop.
         Returns the final short answer.
         """
-        # # Optionally: get global memory again for final short answer
-        # mem = self.rag_engine.Search(self.question)
-        # # final_answer = self.rag_engine.Answer(self.question, short_ans_prompt, self.summary_chain + mem)
-        # final_answer = self.rag_engine.Answer(self.question, short_ans_prompt, mem, self.summary_chain)
+        generation_config = {
+            'max_tokens': 64,
+            'temperature': 0.8,
+            'top_p': 0.7,
+            'stop': ["<|user|>", "<|endoftext|>", "<|assistant|>"]
+        } # generation config for short answer
 
-        prompt = extract_short_ans_prompt.format(question=self.question, reference_ans=reference_ans)
-        conversation_chain = [
-            {"role": "user", "content": prompt},
-        ]
-        prompt = self.tokenizer.apply_chat_template(
-                    conversation_chain,
-                    add_special_tokens=False,  # Set True if you want special tokens
-                    tokenize=False,  # Set True if you want tokenized result
-                    add_generation_prompt=True  # Ensures correct format for model to continue generating
-                )
-        final_answer = self.rag_engine.get_response(prompt, self.rag_engine.generation_api, self.rag_engine.generation_config)
-
+        information_list = []
+        for reasoning in self.reasoning_chain:
+            action = reasoning['action']
+            search_query = action['parameters']['query']
+            search_result = reasoning['observation']
+            information =  "Search query: {}\nSearch result: {}".format(search_query, search_result)
+            information_list.append(information)
+        
+        system = "You are a QA assistant. Always return a short answer. Output ONLY the answer with no extra words."
+        final_answer = self.rag_engine.Answer(self.question, short_ans_prompt, generation_config, information_list, system_msg=system)
         return final_answer
     
     def get_agent_response(self, prompt, base_url):

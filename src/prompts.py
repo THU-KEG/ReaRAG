@@ -39,19 +39,8 @@ Please follow the format strictly.
 '''
 
 # Define some templates for Answer() in rag_engine 
-short_ans_prompt = 'Context: {}\n\nAnswer the Question based on the given Contexts. Only give me the answer and do not output any other words.\n\nQuestion: {}\n\nAnswer:'
-long_ans_prompt = 'If the Question is comparison type, do not refer the given Context, else, answer the Question based on the given Contexts.\n\nContext: {}\n\nQuestion: {}\n\nAnswer:'
-
-
-# Prompt to extract short answer
-extract_short_ans_prompt = """The Reference Answer is the final answer to the question. It's the final deterministic answer, your task is to give concise version of it. Only give me the short answer and do not output any other words.
-[Question]
-{question}
-[Reference answer]
-{reference_ans}
-
-Only give me the short answer and do not output any other words. For yes, or no answer, only answer it short. Give the shortest answer possible.
-"""
+short_ans_prompt = 'You have conducted multiple searches to seek for informations to answer the Question.\n#Searches\n{}\n\n#Instruction\nAnswer the Question based on the searches. **Only output the final answer. Do NOT add any explanation, punctuation, or extra words.**\nQuestion: {}\nAnswer:'
+long_ans_prompt = '#Context\n{}\n\n#Instruction\nAnswer the query based on the given Context. **Do not provide answer from your own knowledge!!**.\nQuery: {}\nResponse:'
 
 data_construction_qwq = '''Your task is to solve a question answering task. To improve your solving accuracy, please conduct reasoning process following this sequence: Thought, Action, Observation steps. Thought can reason about the current situation, and Action are in the form of function, there are two types:
 

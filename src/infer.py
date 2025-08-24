@@ -20,12 +20,6 @@ def main(args):
         rag_config = {
             'top_k': args.top_k,
         },
-        generation_config = {
-            'max_tokens': 1024,
-            'top_p': 0.7,
-            'temperature': 0.95,
-            'stop': ["<|user|>", "<|endoftext|>", "<|assistant|>"]
-        },
         tokenizer = ans_tokenizer      
     )
 

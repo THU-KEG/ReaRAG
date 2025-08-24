@@ -3,20 +3,18 @@ import requests
 from termcolor import colored
 
 class RAGEngineBase:
-    def __init__(self, retriever_api, generation_api, rag_config, generation_config, tokenizer):
+    def __init__(self, retriever_api, generation_api, rag_config, tokenizer):
         """
         Base class for a Retrieval-Augmented Generation (RAG) engine.
         Parameters:
         - retriever_api: API or interface for retrieval.
         - generation_api: API or interface for text generation.
         - rag_config: Configuration for the retrieval component.
-        - generation_config: Configuration for the generation component.
         - tokenizer: Tokenizer for answer generation.
         """
         self.retriever_api = retriever_api
         self.generation_api = generation_api
         self.rag_config = rag_config
-        self.generation_config = generation_config
         self.tokenizer = tokenizer
 
     def Search(self):
@@ -70,8 +68,8 @@ class RAGEngineBase:
         return generation
 
 class RAGEngine(RAGEngineBase):
-    def __init__(self, retriever_api, generation_api, rag_config, generation_config, tokenizer):
-        super().__init__(retriever_api, generation_api, rag_config, generation_config, tokenizer)
+    def __init__(self, retriever_api, generation_api, rag_config, tokenizer):
+        super().__init__(retriever_api, generation_api, rag_config, tokenizer)
 
     def Search(self, query):
         try:
@@ -97,21 +95,19 @@ class RAGEngine(RAGEngineBase):
         search_result = rep.json()
         return search_result 
     
-    def Answer(self, question, prompt_template, memory=None, summary_chain=None):
+    def Answer(self, question, prompt_template, generation_config, memory=None, system_msg=None):
         chunks = []
         for _ in memory:
             if _ not in chunks:
                 chunks.append(_['contents'])
         
-        if summary_chain is not None:
-            for _ in summary_chain:
-                if _ not in chunks:
-                    chunks.append(_)
         prompt = prompt_template.format('\n\n'.join(chunks), question)
 
         conversation_chain = [
+            {"role": "system", "content": system_msg},
             {"role": "user", "content": prompt},
-            # {"role": "assistant", "content": ""},  # Placeholder for model generation
+        ] if system_msg else [
+            {"role": "user", "content": prompt},
         ]
 
         prompt = self.tokenizer.apply_chat_template(
@@ -121,7 +117,7 @@ class RAGEngine(RAGEngineBase):
                     add_generation_prompt=True  # Ensures correct format for model to continue generating
                 )
         try:
-            response = self.get_response(prompt, self.generation_api, self.generation_config)
+            response = self.get_response(prompt, self.generation_api, generation_config)
         except Exception as e:
             print(colored(f"In Answer, Error in get_response: {e}", 'red'))
             raise
